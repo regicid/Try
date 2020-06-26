@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 import subprocess
 from shlex import split
+os.system("mkdir ./Results")
 PARAM = np.linspace(0,1,100)
 for i in range(len(PARAM)//12+1):
 	print(i)

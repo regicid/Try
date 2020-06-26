@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pickle
 import sys
-import multiprocessing
+import multiprocessing as mtp
 
 class CurtyMarsili(object):
     def __init__(self,z=0,z2 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.1,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1):
@@ -75,7 +75,7 @@ class CurtyMarsili(object):
         if len(self.q)>1000:
             self.D_temporary[:1000,] = self.D_history[-1000:,]
         self.q_temporary = []
-        for t in tqdm(range(T)):
+        for t in range(T):
             # Now we update the networks (record scores, and get rid of the worst network member)
             in_deg = np.zeros(self.N,dtype="int")
             a = np.unique(self.network,return_counts=True)
@@ -125,16 +125,16 @@ class CurtyMarsili(object):
     def record(self):
         t = len(self.q_temporary)
         F = self.D_temporary[t:t+1000,]
-        self.α_temporary = self.α_temporary[::10,]
-        self.f_temporary = self.f_temporary[::10,]
-        self.fitness_temporary = self.fitness_temporary[::10,]
-        self.q_temporary = self.q_temporary[::10]
-        a = len(self.q_temporary)
-        self.α_history = np.vstack((self.α_history,self.α_temporary[:a,]))
-        self.f_history = np.vstack((self.f_history,self.f_temporary[:a,]))
-        self.fitness_history = np.vstack((self.fitness_history,self.fitness_temporary[:a,]))
-        self.D_history = F
-        self.q = self.q + self.q_temporary`
+        self.α_temporary = self.α_temporary[::100,]
+        self.f_temporary = self.f_temporary[::100,]
+        self.fitness_temporary = self.fitness_temporary[::100,]
+        #self.q_temporary = self.q_temporary[::10]
+        #a = len(self.q_temporary)
+        #self.α_history = np.vstack((self.α_history,self.α_temporary[:a,]))
+        #self.f_history = np.vstack((self.f_history,self.f_temporary[:a,]))
+        #self.fitness_history = np.vstack((self.fitness_history,self.fitness_temporary[:a,]))
+        #self.D_history = F
+        self.q = self.q + self.q_temporary
 
 i = sys.argv[1]
 z = pickle.load(open("KWARGS_"+i,"rb"))
@@ -143,7 +143,8 @@ def get_cm(o):
     CM = CurtyMarsili(z=.04,z2=.02,Ω = 0.7,γ = o)
     CM.dynamics(10**6)
     CM.record()
-    return CM
+    o = np.round(o,2)	
+    pickle.dump(open(f"./Results/result_{o}","rb"))
 
 l = mtp.Pool()
 runs = l.map_async(get_cm,z)
