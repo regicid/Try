@@ -98,8 +98,9 @@ class CurtyMarsili(object):
                 self.α[b<self.σ_mut] = 1 - self.α[b<self.σ_mut]
                 b = np.random.random(size=self.N)
                 self.follower[b<self.σ_mut] = 1 - self.follower[b<self.σ_mut]
+                b = np.random.random(size=self.N)
+                self.anti_conformist[b<self.σ_mut] = 1 - self.anti_conformist[b<self.σ_mut]
                 self.fitness = self.D_temporary[t:t+1000,].mean(axis=0) + self.Ω*in_deg/self.N - self.c*(~self.follower)
-                #p -= p.min()/2
                 self.fitness /= self.fitness.sum()
                 for j in range(self.selection_force):
                     self.selection()
@@ -121,6 +122,7 @@ class CurtyMarsili(object):
         self.network[i,] = self.network[j,]
         self.network_scores[i,] = self.network_scores[j,]
         self.follower[i] = self.follower[j]
+        self.anti_conformist[i] = self.anti_conformist[j]
         self.D_temporary[t:t+1000,i] = self.D_temporary[t:t+1000,j]
     def record(self):
         t = len(self.q_temporary)
@@ -137,14 +139,15 @@ class CurtyMarsili(object):
         self.q = self.q + self.q_temporary
 
 i = sys.argv[1]
+c = float(sys.argv[2])
 z = pickle.load(open("KWARGS_"+i,"rb"))
 
 def get_cm(o):
-    CM = CurtyMarsili(z=.04,z2=.02,Ω = 0.7,γ = o)
+    CM = CurtyMarsili(z=.04,z2=.02,Ω = o,γ = .05,c = c)
     CM.dynamics(10**6)
     CM.record()
     o = np.round(o,2)	
-    pickle.dump(open(f"./Results/result_{o}","rb"))
+    pickle.dump(open(f"./Results/result_{o}_{c}","rb"))
 
 l = mtp.Pool()
 runs = l.map_async(get_cm,z)
