@@ -6,11 +6,11 @@ import subprocess
 from shlex import split
 os.system("mkdir ./Results")
 PARAM = np.linspace(0,10,60)
-C = [0,.1,.2,.3,.4,.5]
-for c in range(len(C)):
+C = [0,.01,.03,.05]
+for c in C:
 	for i in range(len(PARAM)//12+1):
-		print(i)
+		print(c)
 		KWARGS = PARAM[12*i:12*(i+1)]
 		pickle.dump(KWARGS,open("./KWARGS_"+str(i),"wb"))
-		bash = "srun -N 1 --output=./Results/" + str(i) +" python try.py "+str(i) + " " + str(c)
+		bash = "srun -N 1 --partition=firstgen --output=./Results/" + str(i) +" python try.py "+str(i) + " " + str(c)
 		subprocess.Popen(bash.split(),stdout=subprocess.PIPE)	
