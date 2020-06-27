@@ -147,7 +147,7 @@ def get_cm(o):
     CM.dynamics(10**6)
     CM.record()
     o = np.round(o,2)	
-    pickle.dump(open(f"./Results/result_{o}_{c}","rb"))
+    pickle.dump(CM,open(f"./Results/result_{o}_{c}","wb"))
 
 l = mtp.Pool()
 runs = l.map_async(get_cm,z)
