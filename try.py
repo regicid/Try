@@ -6,9 +6,9 @@ import sys
 import multiprocessing as mtp
 
 class CurtyMarsili(object):
-    def __init__(self,z=0,z2 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.05,γ2 = ..05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1):
+    def __init__(self,z=0,z2 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1):
         #set the parameters
-        
+        self.γ2 = γ2
         self.N_f = int(np.round(N*z))
         self.N_α = int(np.round(N*z2))
         self.N = N
@@ -96,11 +96,12 @@ class CurtyMarsili(object):
                 self.follower[b<self.σ_mut] = 1 - self.follower[b<self.σ_mut]
                 b = np.random.random(size=self.N)
                 self.anti_conformist[b<self.σ_mut] = 1 - self.anti_conformist[b<self.σ_mut]
-                self.accuracy =+ self.D - γ2*self.accuracy
+                self.accuracy =+ self.γ2*self.D -self.γ2*self.accuracy
                 self.fitness = self.accuracy + self.Ω*in_deg/self.N - self.c*(~self.follower)
                 self.fitness /= self.fitness.sum()
-                for j in range(self.selection_force):
-                    self.selection()
+                self.fitness = self.fitness.clip(0)
+		for j in range(self.selection_force):
+			self.selection()
                 self.N_f.append(self.follower.sum())
                 self.α_history[t,]= self.α
                 self.f_history[t,]= self.follower
