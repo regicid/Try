@@ -100,14 +100,14 @@ class CurtyMarsili(object):
                 self.fitness = self.accuracy + self.Ω*in_deg/self.N - self.c*(~self.follower)
                 self.fitness /= self.fitness.sum()
                 self.fitness = self.fitness.clip(0)
-		for j in range(self.selection_force):
-			self.selection()
-                self.N_f.append(self.follower.sum())
-                self.α_history[t,]= self.α
-                self.f_history[t,]= self.follower
-                self.anti_history[t,]= self.anti_conformist
-                self.fitness_history[t,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
-                self.prop_lazy.append(np.mean((self.follower*~self.α)[self.network])/(self.follower*~self.α).sum())
+			for j in range(self.selection_force):
+				self.selection()
+	        self.N_f.append(self.follower.sum())
+	        self.α_history[t,]= self.α
+	        self.f_history[t,]= self.follower
+	        self.anti_history[t,]= self.anti_conformist
+	        self.fitness_history[t,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
+	        self.prop_lazy.append(np.mean((self.follower*~self.α)[self.network])/(self.follower*~self.α).sum())
             self.iterate()
             self.q_history.append(self.compute_q())
             self.prop_i.append(1-np.mean(self.follower[self.network]))
