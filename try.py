@@ -66,7 +66,7 @@ class CurtyMarsili(object):
         self.α_history = np.zeros(shape=(T,self.N),dtype='bool')
         self.f_history = np.zeros(shape=(T,self.N),dtype='bool')
         self.anti_history = np.zeros(shape=(T,self.N),dtype='bool')
-        self.accuracy = np.zeros(shape=(self.N))
+        self.accuracy = .5*np.ones(shape=(self.N))
         self.fitness_history = np.zeros(shape=(T,4))
         if len(self.q)>1000:
             self.D_history[:1000,] = self.D_history[-1000:,]
@@ -89,19 +89,17 @@ class CurtyMarsili(object):
                 p2 = p2/p2.sum()
                 self.network[I,weakest_link[i]] = np.random.choice(not_listened,p = p2)
                 self.network_scores[I,weakest_link[i]] = self.network_scores[I,].mean()
-            if len(self.q) > 1000 or len(self.q_history) > 1000:
-                b = np.random.random(size=self.N)
-                self.α[b<self.σ_mut] = 1 - self.α[b<self.σ_mut]
-                b = np.random.random(size=self.N)
-                self.follower[b<self.σ_mut] = 1 - self.follower[b<self.σ_mut]
-                b = np.random.random(size=self.N)
-                self.anti_conformist[b<self.σ_mut] = 1 - self.anti_conformist[b<self.σ_mut]
-                self.accuracy =+ self.γ2*(self.D>0) -self.γ2*self.accuracy
-                self.fitness = self.accuracy + self.Ω*in_deg/self.N - self.c*(~self.follower)
-                self.fitness /= self.fitness.sum()
-                self.fitness = self.fitness.clip(0)
-		        for j in range(self.selection_force):
-		            self.selection()
+            b = np.random.random(size=self.N)
+            self.α[b<self.σ_mut] = 1 - self.α[b<self.σ_mut]
+            b = np.random.random(size=self.N)
+            self.follower[b<self.σ_mut] = 1 - self.follower[b<self.σ_mut]
+            b = np.random.random(size=self.N)
+            self.anti_conformist[b<self.σ_mut] = 1 - self.anti_conformist[b<self.σ_mut]
+            self.accuracy += self.γ2*(self.D>0) -self.γ2*self.accuracy
+            self.fitness = self.accuracy + self.Ω*in_deg/self.N - self.c*(~self.follower)
+            self.fitness /= self.fitness.sum()
+            for j in range(self.selection_force):
+                self.selection()
             self.N_f.append(self.follower.sum())
             self.α_history[t,]= self.α
             self.f_history[t,]= self.follower
