@@ -96,7 +96,7 @@ class CurtyMarsili(object):
                 self.follower[b<self.σ_mut] = 1 - self.follower[b<self.σ_mut]
                 b = np.random.random(size=self.N)
                 self.anti_conformist[b<self.σ_mut] = 1 - self.anti_conformist[b<self.σ_mut]
-                self.accuracy =+ self.γ2*self.D -self.γ2*self.accuracy
+                self.accuracy =+ self.γ2*(self.D>0) -self.γ2*self.accuracy
                 self.fitness = self.accuracy + self.Ω*in_deg/self.N - self.c*(~self.follower)
                 self.fitness /= self.fitness.sum()
                 self.fitness = self.fitness.clip(0)
