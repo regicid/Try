@@ -100,8 +100,8 @@ class CurtyMarsili(object):
                 self.fitness = self.accuracy + self.Ω*in_deg/self.N - self.c*(~self.follower)
                 self.fitness /= self.fitness.sum()
                 self.fitness = self.fitness.clip(0)
-        for j in range(self.selection_force):
-            self.selection()
+		        for j in range(self.selection_force):
+		            self.selection()
             self.N_f.append(self.follower.sum())
             self.α_history[t,]= self.α
             self.f_history[t,]= self.follower
