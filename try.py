@@ -100,14 +100,14 @@ class CurtyMarsili(object):
                 self.fitness = self.accuracy + self.Ω*in_deg/self.N - self.c*(~self.follower)
                 self.fitness /= self.fitness.sum()
                 self.fitness = self.fitness.clip(0)
-			for j in range(self.selection_force):
-				self.selection()
-	        self.N_f.append(self.follower.sum())
-	        self.α_history[t,]= self.α
-	        self.f_history[t,]= self.follower
-	        self.anti_history[t,]= self.anti_conformist
-	        self.fitness_history[t,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
-	        self.prop_lazy.append(np.mean((self.follower*~self.α)[self.network])/(self.follower*~self.α).sum())
+        for j in range(self.selection_force):
+            self.selection()
+            self.N_f.append(self.follower.sum())
+            self.α_history[t,]= self.α
+            self.f_history[t,]= self.follower
+            self.anti_history[t,]= self.anti_conformist
+            self.fitness_history[t,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
+            self.prop_lazy.append(np.mean((self.follower*~self.α)[self.network])/(self.follower*~self.α).sum())
             self.iterate()
             self.q_history.append(self.compute_q())
             self.prop_i.append(1-np.mean(self.follower[self.network]))
@@ -122,7 +122,7 @@ class CurtyMarsili(object):
         self.follower[i] = self.follower[j]
         self.anti_conformist[i] = self.anti_conformist[j]
         self.accuracy[i] = self.accuracy[j]
-    def record(self):
+    def record(self): 
         t = len(self.q_history)
         self.α_history = self.α_history[::100,]
         self.f_history = self.f_history[::100,]
@@ -137,7 +137,7 @@ def get_cm(o):
     CM = CurtyMarsili(z=.04,z2=.02,Ω = o,γ = .05,c = c)
     CM.dynamics(10**6)
     CM.record()
-    o = np.round(o,2)	
+    o = np.round(o,2)    
     pickle.dump(CM,open(f"./Results/result_{o}_{c}","wb"))
 
 l = mtp.Pool()
