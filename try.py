@@ -6,9 +6,10 @@ import sys
 import multiprocessing as mtp
 
 class CurtyMarsili(object):
-    def __init__(self,z=0,z2 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1):
+    def __init__(self,z=0,z2 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1,raoult=False):
         #set the parameters
         self.γ2 = γ2
+        self.raoult = raoult
         self.N_f = int(np.round(N*z))
         self.N_α = int(np.round(N*z2))
         self.N = N
@@ -93,8 +94,9 @@ class CurtyMarsili(object):
             self.α[b<self.σ_mut] = 1 - self.α[b<self.σ_mut]
             b = np.random.random(size=self.N)
             self.follower[b<self.σ_mut] = 1 - self.follower[b<self.σ_mut]
-            b = np.random.random(size=self.N)
-            self.anti_conformist[b<self.σ_mut] = 1 - self.anti_conformist[b<self.σ_mut]
+            if self.raoult:
+                b = np.random.random(size=self.N)
+                self.anti_conformist[b<self.σ_mut] = 1 - self.anti_conformist[b<self.σ_mut]
             self.accuracy += self.γ2*(self.D>0) -self.γ2*self.accuracy
             self.fitness = self.accuracy + self.Ω*in_deg/self.N - self.c*(~self.follower)
             self.fitness /= self.fitness.sum()
