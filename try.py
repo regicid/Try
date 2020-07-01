@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import pickle
 import sys
 import multiprocessing as mtp
+import os
+os.system("mkdir ./Results")
 
 class CurtyMarsili(object):
     def __init__(self,z=0,z2 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1,raoult=False):
@@ -44,7 +46,6 @@ class CurtyMarsili(object):
         self.in_d = in_deg
         self.N_f = [self.N_f]
         self.dandy_share = []
-        
     def compute_q(self):          
         return np.mean(self.D[self.follower] > 0)   
     def compute_pi(self):
@@ -64,13 +65,11 @@ class CurtyMarsili(object):
                 avg_group_choice = np.mean(group_choices,axis=1)
                 self.D[random_follower] = np.sign(avg_group_choice)*(1-2*self.anti_conformist[random_follower])    
     def dynamics(self,T):
-        self.α_history = np.zeros(shape=(T/100,self.N),dtype='bool')
-        self.f_history = np.zeros(shape=(T/100,self.N),dtype='bool')
-        self.anti_history = np.zeros(shape=(T/100,self.N),dtype='bool')
+        self.α_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
+        self.f_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
+        self.anti_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
         self.accuracy = .5*np.ones(shape=(self.N))
         self.fitness_history = np.zeros(shape=(T,4))
-        if len(self.q)>1000:
-            self.D_history[:1000,] = self.D_history[-1000:,]
         self.q_history = []
         for t in range(T):
             # Now we update the networks (record scores, and get rid of the worst network member)
@@ -124,26 +123,20 @@ class CurtyMarsili(object):
         self.anti_conformist[i] = self.anti_conformist[j]
         self.accuracy[i] = self.accuracy[j]
 
-i = sys.argv[1]
-c = float(sys.argv[2])
-z = pickle.load(open("KWARGS_"+i,"rb"))
+z = np.linspace(0,10,40)
 
-def get_cm(o):
-    CM = CurtyMarsili(z=.04,z2=.02,Ω = o,γ = .05,c = c)
-    CM.dynamics(10**6)
-<<<<<<< HEAD
-    CM.record()
-    o = np.round(o,2)	
-    pickle.dump(CM,open(f"./Results/result_{o}","wb"))
-=======
-    o = np.round(o,2)    
-    pickle.dump(CM,open(f"./Results/result_{o}_{c}","wb"))
->>>>>>> origin/Raoult
 
-l = mtp.Pool()
-runs = l.map_async(get_cm,z)
-l.close()
-l.join()
-Results = []
-for run in runs.get():
-    Results.append(run)
+C = [0,.01,.03,.05]
+for c in C:
+    def get_cm(o):
+        CM = CurtyMarsili(z=.04,z2=.02,Ω = o,γ = .05,c = c)
+        CM.dynamics(10**6)
+        o = np.round(o,2)
+        pickle.dump(CM,open(f"./Results/result_{o}_{c}","wb"))
+    l = mtp.Pool()
+    runs = l.map_async(get_cm,z)
+    l.close()
+    l.join()
+    Results = []
+    for run in runs.get():
+        Results.append(run)
