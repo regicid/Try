@@ -64,9 +64,9 @@ class CurtyMarsili(object):
                 avg_group_choice = np.mean(group_choices,axis=1)
                 self.D[random_follower] = np.sign(avg_group_choice)*(1-2*self.anti_conformist[random_follower])    
     def dynamics(self,T):
-        self.α_history = np.zeros(shape=(T,self.N),dtype='bool')
-        self.f_history = np.zeros(shape=(T,self.N),dtype='bool')
-        self.anti_history = np.zeros(shape=(T,self.N),dtype='bool')
+        self.α_history = np.zeros(shape=(T/100,self.N),dtype='bool')
+        self.f_history = np.zeros(shape=(T/100,self.N),dtype='bool')
+        self.anti_history = np.zeros(shape=(T/100,self.N),dtype='bool')
         self.accuracy = .5*np.ones(shape=(self.N))
         self.fitness_history = np.zeros(shape=(T,4))
         if len(self.q)>1000:
@@ -103,10 +103,11 @@ class CurtyMarsili(object):
             for j in range(self.selection_force):
                 self.selection()
             self.N_f.append(self.follower.sum())
-            self.α_history[t,]= self.α
-            self.f_history[t,]= self.follower
-            self.anti_history[t,]= self.anti_conformist
-            self.fitness_history[t,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
+            if t % 100 == 0:
+                self.α_history[t,]= self.α
+                self.f_history[t,]= self.follower
+                self.anti_history[t,]= self.anti_conformist
+                self.fitness_history[t,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
             self.prop_lazy.append(np.mean((self.follower*~self.α)[self.network])/(self.follower*~self.α).sum())
             self.iterate()
             self.q_history.append(self.compute_q())
@@ -122,12 +123,6 @@ class CurtyMarsili(object):
         self.follower[i] = self.follower[j]
         self.anti_conformist[i] = self.anti_conformist[j]
         self.accuracy[i] = self.accuracy[j]
-    def record(self): 
-        t = len(self.q_history)
-        self.α_history = self.α_history[::100,]
-        self.f_history = self.f_history[::100,]
-        self.anti_history = self.anti_history[::100,]
-        self.fitness_history = self.fitness_history[::100,]
 
 i = sys.argv[1]
 c = float(sys.argv[2])
@@ -136,7 +131,6 @@ z = pickle.load(open("KWARGS_"+i,"rb"))
 def get_cm(o):
     CM = CurtyMarsili(z=.04,z2=.02,Ω = o,γ = .05,c = c)
     CM.dynamics(10**6)
-    CM.record()
     o = np.round(o,2)    
     pickle.dump(CM,open(f"./Results/result_{o}_{c}","wb"))
 
