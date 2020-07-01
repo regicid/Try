@@ -44,14 +44,9 @@ class CurtyMarsili(object):
         in_deg[a[0]] = a[1]
         self.in_d = in_deg
         self.N_f = [self.N_f]
-        self.dandy_share = []
-        
+        self.dandy_share = []        
     def compute_q(self):          
         return np.mean(self.D[self.follower] > 0)   
-    def compute_pi(self):
-        return np.mean(self.D > 0)   
-    def compute_informed(self):
-        return np.mean(self.D[~self.follower] > 0)        
     def iterate(self,T=10000): # Iterative imitation process
         self.D[self.follower] = np.random.choice([-1,1],p = [0.5, 0.5],size = self.follower.sum())
         self.D[~self.follower] = np.random.choice([-1,1],p = [1-self.p,self.p],size = self.N - self.follower.sum())
@@ -65,13 +60,11 @@ class CurtyMarsili(object):
                 avg_group_choice = np.mean(group_choices,axis=1)
                 self.D[random_follower] = np.sign(avg_group_choice)*(1-2*self.anti_conformist[random_follower])    
     def dynamics(self,T):
-        self.α_history = np.zeros(shape=(T/100,self.N),dtype='bool')
-        self.f_history = np.zeros(shape=(T/100,self.N),dtype='bool')
-        self.anti_history = np.zeros(shape=(T/100,self.N),dtype='bool')
+        self.α_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
+        self.f_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
+        self.anti_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
         self.accuracy = .5*np.ones(shape=(self.N))
         self.fitness_history = np.zeros(shape=(T,4))
-        if len(self.q)>1000:
-            self.D_history[:1000,] = self.D_history[-1000:,]
         self.q_history = []
         for t in range(T):
             # Now we update the networks (record scores, and get rid of the worst network member)
@@ -132,14 +125,8 @@ z = pickle.load(open("KWARGS_"+i,"rb"))
 def get_cm(o):
     CM = CurtyMarsili(z=.04,z2=.02,Ω = o,γ = .05,c = c)
     CM.dynamics(10**6)
-<<<<<<< HEAD
-    CM.record()
-    o = np.round(o,2)	
-    pickle.dump(CM,open(f"./Results/result_{o}","wb"))
-=======
     o = np.round(o,2)    
     pickle.dump(CM,open(f"./Results/result_{o}_{c}","wb"))
->>>>>>> origin/Raoult
 
 l = mtp.Pool()
 runs = l.map_async(get_cm,z)
