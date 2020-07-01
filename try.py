@@ -6,18 +6,19 @@ import sys
 import multiprocessing as mtp
 
 class CurtyMarsili(object):
-    def __init__(self,z=0,z2 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1,raoult=False):
+    def __init__(self,z=0,z2 = 0,z3 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1,raoult=False):
         #set the parameters
         self.γ2 = γ2
         self.raoult = raoult
         self.N_f = int(np.round(N*z))
-        self.N_α = int(np.round(N*z2))
         self.N = N
         self.follower = np.zeros(self.N,dtype="bool")
         self.follower[:self.N_f] = True
         self.α = np.zeros(self.N,dtype='bool')
-        self.α[:self.N_α] = True
+        self.α[:self.int(np.round(N*z2))] = True
         self.anti_conformist = np.zeros(self.N,dtype="bool")
+        b = np.random.random(size=self.N)
+        self.anti_conformist[b<z3] = True
         self.Ω = Ω
         self.p = p
         self.m = m
