@@ -1,21 +1,23 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import pickle
 import sys
 import multiprocessing as mtp
+import os
+os.system("mkdir ./Results")
 
 class CurtyMarsili(object):
-    def __init__(self,z=0,z2 = 0,z3 = 0,a = 1, N=2000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=1,raoult=False):
+    def __init__(self,z=0,z2 = 0,z3=0,a = 1, N=5000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 3*10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=2,raoult=True):
         #set the parameters
         self.γ2 = γ2
         self.raoult = raoult
         self.N_f = int(np.round(N*z))
+        self.N_α = int(np.round(N*z2))
         self.N = N
         self.follower = np.zeros(self.N,dtype="bool")
         self.follower[:self.N_f] = True
         self.α = np.zeros(self.N,dtype='bool')
-        self.α[:int(np.round(N*z2))] = True
+        self.α[:self.N_α] = True
         self.anti_conformist = np.zeros(self.N,dtype="bool")
         b = np.random.random(size=self.N)
         self.anti_conformist[b<z3] = True
@@ -44,10 +46,20 @@ class CurtyMarsili(object):
         in_deg[a[0]] = a[1]
         self.in_d = in_deg
         self.N_f = [self.N_f]
-        self.dandy_share = []        
-    def compute_q(self):          
-        return np.mean(self.D[self.follower] > 0)   
-    def iterate(self,T=10000): # Iterative imitation process
+        self.dandy_share = []
+        self.α_history = []
+        self.f_history = []
+        self.anti_history = []
+        self.fitness_history = np.zeros(shape=(0,4))
+        self.accuracy = .5*np.ones(shape=(self.N))
+        self.q_history = []
+    def compute_q(self):
+        return np.mean(self.D[self.follower] > 0)
+    def compute_pi(self):
+        return np.mean(self.D > 0)
+    def compute_informed(self):
+        return np.mean(self.D[~self.follower] > 0)
+    def iterate(self,T=20000): # Iterative imitation process
         self.D[self.follower] = np.random.choice([-1,1],p = [0.5, 0.5],size = self.follower.sum())
         self.D[~self.follower] = np.random.choice([-1,1],p = [1-self.p,self.p],size = self.N - self.follower.sum())
         if self.follower.sum()>0:
@@ -58,14 +70,11 @@ class CurtyMarsili(object):
                 group_choices = self.D[self.network[random_follower,]]
                 #align your choice with that of the majority
                 avg_group_choice = np.mean(group_choices,axis=1)
-                self.D[random_follower] = np.sign(avg_group_choice)*(1-2*self.anti_conformist[random_follower])    
+                self.D[random_follower] = np.sign(avg_group_choice)*(1-2*self.anti_conformist[random_follower])
     def dynamics(self,T):
-        self.α_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
-        self.f_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
-        self.anti_history = np.zeros(shape=(T//100+1,self.N),dtype='bool')
-        self.accuracy = .5*np.ones(shape=(self.N))
-        self.fitness_history = np.zeros(shape=(T,4))
-        self.q_history = []
+        self.fitness_history = np.vstack((self.fitness_history,np.zeros(shape=(T,4))))
+        self.in_d = np.empty((T,self.N),dtype="int")
+        self.accuracy_history = np.empty((T,self.N))
         for t in range(T):
             # Now we update the networks (record scores, and get rid of the worst network member)
             in_deg = np.zeros(self.N,dtype="int")
@@ -97,12 +106,11 @@ class CurtyMarsili(object):
             for j in range(self.selection_force):
                 self.selection()
             self.N_f.append(self.follower.sum())
-            if t % 100 == 0:
-                self.α_history[t//100,]= self.α
-                self.f_history[t//100,]= self.follower
-                self.anti_history[t//100,]= self.anti_conformist
-                self.fitness_history[t//100,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
-            self.prop_lazy.append(np.mean((self.follower*~self.α)[self.network])/(self.follower*~self.α).sum())
+            self.α_history.append(self.α.mean())
+            self.f_history.append(self.follower.mean())
+            self.anti_history.append(self.anti_conformist.mean())
+            self.fitness_history[t,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
+
             self.iterate()
             self.q_history.append(self.compute_q())
             self.prop_i.append(1-np.mean(self.follower[self.network]))
