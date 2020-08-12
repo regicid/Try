@@ -127,14 +127,14 @@ class CurtyMarsili(object):
         self.accuracy[i] = self.accuracy[j]
 
 i = sys.argv[1]
-c = float(sys.argv[2])
+p = float(sys.argv[2])
 z = pickle.load(open("KWARGS_"+i,"rb"))
 
 def get_cm(o):
-    CM = CurtyMarsili(z=.04,z2=.02,Ω = o,γ = .05,c = c)
+    CM = CurtyMarsili(z=.04,z2=.02,z3=.02,Ω = o,γ = .05,c = .01,p = p)
     CM.dynamics(10**6)
     o = np.round(o,2)    
-    pickle.dump(CM,open(f"./Results/result_{o}_{c}","wb"))
+    pickle.dump(CM,open(f"./Results/result_{o}_{p}","wb"))
 
 l = mtp.Pool()
 runs = l.map_async(get_cm,z)
