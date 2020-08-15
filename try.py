@@ -47,7 +47,6 @@ class CurtyMarsili(object):
         in_deg[a[0]] = a[1]
         self.in_d = in_deg
         self.N_f = [self.N_f]
-        self.dandy_share = []
         self.α_history = []
         self.f_history = []
         self.anti_history = []
@@ -75,7 +74,6 @@ class CurtyMarsili(object):
     def dynamics(self,T):
         self.fitness_history = np.vstack((self.fitness_history,np.zeros(shape=(T,4))))
         self.in_d = np.empty((T,self.N),dtype="int")
-        self.accuracy_history = np.empty((T,self.N))
         for t in range(T):
             # Now we update the networks (record scores, and get rid of the worst network member)
             in_deg = np.zeros(self.N,dtype="int")
@@ -115,7 +113,6 @@ class CurtyMarsili(object):
             self.iterate()
             self.q_history.append(self.compute_q())
             self.prop_i.append(1-np.mean(self.follower[self.network]))
-            self.dandy_share.append(self.follower[self.network[self.follower*self.α,]].mean())
     def selection(self):
         t = len(self.q_history)
         i = np.random.choice(range(self.N))
@@ -126,6 +123,15 @@ class CurtyMarsili(object):
         self.follower[i] = self.follower[j]
         self.anti_conformist[i] = self.anti_conformist[j]
         self.accuracy[i] = self.accuracy[j]
+    def record(self):
+        self.α_history = self.α_history[::100]
+        self.f_history = self.f_history[::100]
+        self.prop_i = self.prop_i[::100]
+        self.q_history = self.q_history[::100]
+        self.anti_history = self.anti_history[::100]
+        self.N_f= self.N_f[::100]
+        self.fitness_history = self.fitness_history[::100,]
+
 
 z = np.linspace(0,10,40)
 
@@ -135,6 +141,7 @@ for p in P:
     def get_cm(o):
         CM = CurtyMarsili(z=.04,z2=.02,z3=.02,Ω = o,γ = .05,c = .01,p = p)
         CM.dynamics(10**6)
+        CM.record()
         o = np.round(o,2)
         pickle.dump(CM,open(f"./Results2/result_{o}_{p}","wb"))
     l = mtp.Pool()
