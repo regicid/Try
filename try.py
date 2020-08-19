@@ -45,7 +45,6 @@ class CurtyMarsili(object):
         in_deg = np.zeros(self.N,dtype="int")
         a = np.unique(self.network,return_counts=True)
         in_deg[a[0]] = a[1]
-        self.in_d = in_deg
         self.N_f = [self.N_f]
         self.α_history = []
         self.f_history = []
@@ -73,7 +72,6 @@ class CurtyMarsili(object):
                 self.D[random_follower] = np.sign(avg_group_choice)*(1-2*self.anti_conformist[random_follower])
     def dynamics(self,T):
         self.fitness_history = np.vstack((self.fitness_history,np.zeros(shape=(T,4))))
-        self.in_d = np.empty((T,self.N),dtype="int")
         for t in range(T):
             # Now we update the networks (record scores, and get rid of the worst network member)
             in_deg = np.zeros(self.N,dtype="int")
