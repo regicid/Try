@@ -121,9 +121,10 @@ class CurtyMarsili(object):
         self.anti_conformist[i] = self.anti_conformist[j]
         self.D_temporary[t:t+1000,i] = self.D_temporary[t:t+1000,j]
     def record(self):
-        t = len(self.q_temporary)
-        F = self.D_temporary[t:t+1000,]
-        self.α_temporary = self.α_temporary[::100,]
-        self.f_temporary = self.f_temporary[::100,]
-        self.fitness_temporary = self.fitness_temporary[::100,]
-        self.q = self.q + self.q_temporary
+        self.α_history = self.α_history[::100]
+        self.f_history = self.f_history[::100]
+        self.prop_i = self.prop_i[::100]
+        self.q_history = self.q_history[::100]
+        self.anti_history = self.anti_history[::100]
+        self.N_f= self.N_f[::100]
+        self.fitness_history = self.fitness_history[::100,]
