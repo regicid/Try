@@ -13,7 +13,6 @@ import os
 import pickle
 a = os.listdir("./Results")
 for i in a:
-    try:
-        r = pickle.load(open(i,"rb"))
-        r = compressor(r)
-        pickle.dump(r,open(f"./Results_clean/{i}","wb"))
+    r = pickle.load(open(i,"rb"))
+    r = compressor(r)
+    pickle.dump(r,open(f"./Results_clean/{i}","wb"))
