@@ -3,10 +3,11 @@ import os
 import pickle
 import numpy as np
 Results = []
-a = os.listdir()
+path = "Results"
+a = os.listdir(path)
 for i in a:
 	try:
-		r = pickle.load(open(i,"rb"))
+		r = pickle.load(open(path+"/"+i,"rb"))
 		Results.append(r)
 	except:
 		print(i)
