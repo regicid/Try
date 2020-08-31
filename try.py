@@ -7,7 +7,7 @@ import os
 os.system("mkdir ./Results")
 
 class CurtyMarsili(object):
-    def __init__(self,z=0,z2 = 0,z3=0,a = 1, N=5000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 3*10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=2,raoult=True):
+    def __init__(self,z=0,z2 = 0,z3=0,a = 1, N=5000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=2,raoult=True):
         #set the parameters
         self.γ2 = γ2
         self.raoult = raoult
@@ -45,7 +45,6 @@ class CurtyMarsili(object):
         a = np.unique(self.network,return_counts=True)
         in_deg[a[0]] = a[1]
         self.N_f = [self.N_f]
-        self.dandy_share = []
         self.α_history = []
         self.f_history = []
         self.anti_history = []
@@ -111,7 +110,6 @@ class CurtyMarsili(object):
             self.iterate()
             self.q_history.append(self.compute_q())
             self.prop_i.append(1-np.mean(self.follower[self.network]))
-            self.dandy_share.append(self.follower[self.network[self.follower*self.α,]].mean())
     def selection(self):
         t = len(self.q_history)
         i = np.random.choice(range(self.N))
@@ -122,7 +120,15 @@ class CurtyMarsili(object):
         self.follower[i] = self.follower[j]
         self.anti_conformist[i] = self.anti_conformist[j]
         self.accuracy[i] = self.accuracy[j]
-
+    def compressor(self):
+        self.q = np.mean(self.q_history[-300000:])
+        self.f_history = pd.DataFrame(self.f_history).rolling(100).mean().values[::100,0]
+        self.α_history = pd.DataFrame(self.α_history).rolling(100).mean().values[::100,0]
+        self.prop_i = pd.DataFrame(self.prop_i).rolling(100).mean().values[::100,0]
+        self.q_history = self.q_history[::100]
+        self.anti_history = pd.DataFrame(self.anti_history).rolling(100).mean().values[::100,0]
+        self.N_f= self.N_f[::100]
+        self.fitness_history = pd.DataFrame(self.fitness_history).rolling(100).mean().values[::100,:]
 i = sys.argv[1]
 p = float(sys.argv[2])
 z = pickle.load(open("KWARGS_"+i,"rb"))
@@ -130,8 +136,10 @@ z = pickle.load(open("KWARGS_"+i,"rb"))
 def get_cm(o):
     CM = CurtyMarsili(z=.04,z2=.02,z3=.02,Ω = o,γ = .05,c = .01,p = p)
     CM.dynamics(10**6)
-    o = np.round(o,2)    
-    pickle.dump(CM,open(f"./Results/result_{o}_{p}","wb"))
+    CM.compressor()
+    o = np.round(o,2)
+    pp = np.round(p,2)     
+    pickle.dump(CM,open(f"./Results/result_{o}_{pp}","wb"))
 
 l = mtp.Pool()
 runs = l.map_async(get_cm,z)
