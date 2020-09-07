@@ -3,7 +3,7 @@ import os
 import pickle
 import numpy as np
 Results = []
-path = "Results_clean"
+path = "Results"
 a = os.listdir(path)
 for i in a:
 	try:
@@ -29,4 +29,4 @@ for i in range(len(Results)):
 	R[:,i] = np.array([a,b,c,d,e,f,g,h,j,p])
 
 print(list(R))
-np.save("result.npy",R)
+np.save("result2.npy",R)
