@@ -16,15 +16,15 @@ for i in a:
 R = np.zeros((10,len(Results)))
 
 for i in range(len(Results)):
-	a = np.mean(Results[i].q_history[-3000:])
+	a = np.mean(Results[i].q_history[-10000:])
 	b = Results[i].anti_conformist.mean()
 	c = (Results[i].follower*Results[i].α).mean()
 	d = (Results[i].follower*~Results[i].α).mean()
 	e = (~Results[i].follower).mean()
 	f = Results[i].c
 	g = Results[i].Ω
-	h = np.mean(Results[i].prop_i[-3000:])
-	j = np.abs(np.array(Results[i].q_history[-3000:]) - .5).mean()
+	h = np.mean(Results[i].prop_i[-10000:])
+	j = np.abs(np.array(Results[i].q_history[-10000:]) - .5).mean()
 	p = Results[i].p
 	R[:,i] = np.array([a,b,c,d,e,f,g,h,j,p])
 
