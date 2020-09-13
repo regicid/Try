@@ -80,6 +80,11 @@ class CurtyMarsili(object):
             self.network_scores += (self.D[self.network]>0) + self.α_dandy*np.broadcast_to(self.α,shape=(self.m,self.N)).transpose()*(self.D[self.network]
                                     - np.mean(self.D[self.network]))**2 - self.γ*self.network_scores
             a = np.where(np.random.random(size=self.N)< self.γ)[0]
+            #Shuffle the network to avoid argmin issues
+            z = np.random.permutation(self.m) 
+            self.network = self.network[:,z]
+            self.network_scores = self.network_scores[:,z]
+            #select the poorest forecaster
             weakest_link = np.argmin(self.network_scores[a,],axis=1)
             p = in_deg + self.a
             for i in range(len(a)):
@@ -104,9 +109,8 @@ class CurtyMarsili(object):
             self.N_f.append(self.follower.sum())
             self.α_history.append(self.α.mean())
             self.f_history.append(self.follower.mean())
-            self.anti_history.append(self.anti_conformist.mean())
+            self.anti_history.append((self.anti_conformist*self.follower).mean())
             self.fitness_history[t,] = [self.fitness[~self.follower*~self.anti_conformist].mean(),self.fitness[~self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.α*self.follower*~self.anti_conformist].mean(),self.fitness[self.follower*self.anti_conformist].mean()]
-
             self.iterate()
             self.q_history.append(self.compute_q())
             self.prop_i.append(1-np.mean(self.follower[self.network]))
