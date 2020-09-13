@@ -6,8 +6,9 @@ import multiprocessing as mtp
 from tqdm import tqdm_notebook as tqdm
 
 class CurtyMarsili(object):
-    def __init__(self,z=0,z2 = 0,z3=0,a = 1, N=5000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=2,raoult=True,tqdm=False):
+    def __init__(self,z=0,z2 = 0,z3=0,a = 1, N=5000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=2,raoult=True,tqdm=False,T = 100000):
         #set the parameters
+        self.T = T
         self.tqdm = tqdm
         self.γ2 = γ2
         self.raoult = raoult
@@ -57,11 +58,11 @@ class CurtyMarsili(object):
         return np.mean(self.D > 0)
     def compute_informed(self):
         return np.mean(self.D[~self.follower] > 0)
-    def iterate(self,T=20000): # Iterative imitation process
+    def iterate(self): # Iterative imitation process
         self.D[self.follower] = np.random.choice([-1,1],p = [0.5, 0.5],size = self.follower.sum())
         self.D[~self.follower] = np.random.choice([-1,1],p = [1-self.p,self.p],size = self.N - self.follower.sum())
         if self.follower.sum()>0:
-            for t in range(T//self.n):
+            for t in range(self.T//self.n):
                 #pick a random follower
                 random_follower = np.random.choice(np.where(self.follower)[0],size = self.n)
                 #get the choices of the group
