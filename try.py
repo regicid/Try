@@ -4,11 +4,13 @@ import pickle
 import sys
 import multiprocessing as mtp
 import os
+from tqdm import tqdm_notebook as tqdm
 os.system("mkdir ./Results")
 
 class CurtyMarsili(object):
-    def __init__(self,z=0,z2 = 0,z3=0,a = 1, N=5000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=2,raoult=True):
+    def __init__(self,z=0,z2 = 0,z3=0,a = 1, N=5000, p=0.52, m=11,γ = 0.05,γ2 = .05,σ_mut = 10**-8,α_dandy = 1,n = 100,Ω = 1,c = .03,selection_force=2,raoult=True,tqdm=False):
         #set the parameters
+        self.tqdm = tqdm
         self.γ2 = γ2
         self.raoult = raoult
         self.N_f = int(np.round(N*z))
@@ -71,7 +73,11 @@ class CurtyMarsili(object):
                 self.D[random_follower] = np.sign(avg_group_choice)*(1-2*self.anti_conformist[random_follower])
     def dynamics(self,T):
         self.fitness_history = np.vstack((self.fitness_history,np.zeros(shape=(T,4))))
-        for t in range(T):
+        if self.tqdm:
+        	iter = tqdm(range(T))
+        else:
+        	iter = range(T)
+        for t in iter:
             # Now we update the networks (record scores, and get rid of the worst network member)
             in_deg = np.zeros(self.N,dtype="int")
             a = np.unique(self.network,return_counts=True)
